@@ -17,7 +17,7 @@
     :root {
       --primary: #232f3e;
       --primary-light: #37475a;
-      --primary-dark: #245af0;
+      --primary-dark: #1a237e;
       --gold: #ff9900;
       --gold-light: #ffad33;
       --gold-glow: rgba(255, 153, 0, 0.15);
@@ -31,15 +31,15 @@
       --danger-light: #e47911;
       --warning: #f0ad4e;
       --info: #146eb4;
-      --text-primary: Black;
-      --text-secondary: Black;
-      --text-muted: #eb0d0d;
+      --text-primary: #1a237e;
+      --text-secondary: #333;
+      --text-muted: #666;
       --card-bg: #ffffff;
-      --card-shadow: none;
-      --shadow-hover: none;
-      --border-light: #dddddd;
-      --radius: 4px;
-      --transition: none;
+      --card-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      --shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
+      --border-light: #e0e0e0;
+      --radius: 12px;
+      --transition: all 0.3s ease;
     }
 
     body {
@@ -126,7 +126,7 @@
     }
     .sidebar {
       width: 220px;
-      background: rgba(245, 241, 233, 0.9);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(20px);
       padding: 12px 0;
       flex-shrink: 0;
@@ -142,7 +142,7 @@
       background: transparent;
       border: none;
       color: var(--text-secondary);
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 500;
       font-family: inherit;
       text-align: left;
@@ -152,7 +152,7 @@
       position: relative;
     }
     .sidebar button:hover {
-      background: rgba(26, 126, 79, 0.04);
+      background: rgba(26, 35, 126, 0.04);
       color: var(--primary);
       padding-left: 28px;
     }
@@ -438,7 +438,7 @@
     }
     table th {
       background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      color: #3da030;
+      color: #fff;
       padding: 12px 16px;
       text-align: center;
       position: sticky;
@@ -457,7 +457,7 @@
       vertical-align: middle;
     }
     table tr:hover td {
-      background: rgba(21, 219, 176, 0.03);
+      background: rgba(26, 35, 126, 0.03);
     }
     table tr:nth-child(even) td {
       background: rgba(26, 35, 126, 0.02);
@@ -508,7 +508,7 @@
       display: inline-block;
     }
     .editable-field:hover {
-      background: rgba(99, 173, 99, 0.06);
+      background: rgba(26, 35, 126, 0.06);
       box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.12);
     }
     .edit-mode .editable-field {
@@ -690,7 +690,7 @@
       box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
     }
     .voucher-arrears {
-      background: red;
+      background: #fff3cd;
       padding: 6px 14px;
       border-radius: 8px;
       margin: 4px 0;
@@ -787,6 +787,7 @@
       animation: slideUp 0.3s ease;
       display: none;
       min-width: 200px;
+      max-width: 400px;
     }
     .toast.show {
       display: block;
@@ -1581,106 +1582,71 @@
     };
 
     // ====================================================================
-    // TOAST
+    // FIXED TOAST FUNCTION
     // ====================================================================
     function showToast(msg, isError = false) {
       const t = document.getElementById('toast');
+      if (!t) {
+        console.error('Toast element not found!');
+        alert(msg);
+        return;
+      }
+      
+      // Clear any existing timeout
+      if (t._timeout) {
+        clearTimeout(t._timeout);
+        t._timeout = null;
+      }
+      
       t.textContent = msg;
       t.className = 'toast show ' + (isError ? 'error' : 'success');
-      clearTimeout(t._timeout);
-      t._timeout = setTimeout(() => t.classList.remove('show'), 3000);
+      t.style.display = 'block';
+      
+      // Auto-hide after 3.5 seconds
+      t._timeout = setTimeout(() => {
+        t.classList.remove('show');
+        t.style.display = 'none';
+        t._timeout = null;
+      }, 3500);
     }
 
     // ====================================================================
-    // INIT
+    // UTILITY FUNCTIONS
     // ====================================================================
-    function init() {
-      document.querySelectorAll('select[id$="Month"]:not(#hMonth):not(#rpMonth)').forEach(sel => {
-        sel.innerHTML = MONTHS.map(m => `<option value="${m}">${m}</option>`).join('');
-        sel.value = currentMonth;
-      });
-      document.querySelectorAll('select[id$="Year"]:not(#hYear):not(#rpYear)').forEach(sel => {
-        sel.innerHTML = YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
-        sel.value = currentYear;
-      });
-
-      const dashMonth = document.getElementById('dashMonth');
-      dashMonth.innerHTML = MONTHS.map(m => `<option value="${m}">${m}</option>`).join('');
-      dashMonth.value = currentMonth;
-      const dashYear = document.getElementById('dashYear');
-      dashYear.innerHTML = YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
-      dashYear.value = currentYear;
-
-      const hMonth = document.getElementById('hMonth');
-      hMonth.innerHTML = '<option value="All">All</option>' + MONTHS.map(m => `<option value="${m}">${m}</option>`).join('');
-      hMonth.value = 'All';
-      const hYear = document.getElementById('hYear');
-      hYear.innerHTML = '<option value="All">All</option>' + YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
-      hYear.value = 'All';
-
-      const rpMonth = document.getElementById('rpMonth');
-      rpMonth.innerHTML = '<option value="All Months">All Months</option>' + MONTHS.map(m => `<option value="${m}">${m}</option>`).join('');
-      rpMonth.value = currentMonth;
-      const rpYear = document.getElementById('rpYear');
-      rpYear.innerHTML = YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
-      rpYear.value = currentYear;
-
-      populateHistoryStudents();
-
-      document.querySelectorAll('.sidebar button').forEach(btn => {
-        btn.addEventListener('click', function() {
-          document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
-          this.classList.add('active');
-          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-          document.getElementById('tab-' + this.dataset.tab).classList.add('active');
-          if (this.dataset.tab === 'dashboard') updateDashboard();
-          if (this.dataset.tab === 'students') loadStudents();
-          if (this.dataset.tab === 'history') loadHistory();
-          if (this.dataset.tab === 'backup') updateBackupStats();
-          if (this.dataset.tab === 'reports') { toggleReportOptions();
-            generateReport(); }
-          if (this.dataset.tab === 'voucher') { loadVoucherStudents(); }
-          if (this.dataset.tab === 'promote') { loadPromoteHistory(); }
-        });
-      });
-
-      document.getElementById('fdMonth').addEventListener('change', () => {
-        if (currentVoucherStudent) { updateFeeDepositSummary();
-          updateFeeAmount();
-          loadFeeTransactionHistory(); }
-      });
-      document.getElementById('fdYear').addEventListener('change', () => {
-        if (currentVoucherStudent) { updateFeeDepositSummary();
-          updateFeeAmount();
-          loadFeeTransactionHistory(); }
-      });
-      document.getElementById('reportType').addEventListener('change', toggleReportOptions);
-      document.getElementById('dashMonth').addEventListener('change', updateDashboard);
-      document.getElementById('dashYear').addEventListener('change', updateDashboard);
-
-      loadData();
+    function formatCurrency(n) { 
+      return 'Rs.' + Number(n).toLocaleString(); 
     }
 
-    // ====================================================================
-    // UTILITY
-    // ====================================================================
-    function formatCurrency(n) { return 'Rs.' + Number(n).toLocaleString(); }
+    function getTodayDate() { 
+      return new Date().toISOString().split('T')[0]; 
+    }
 
-    function getTodayDate() { return new Date().toISOString().split('T')[0]; }
+    function generateStudentId() { 
+      const id = 'S' + String(nextStudentId).padStart(4, '0');
+      nextStudentId++; 
+      return id; 
+    }
 
-    function generateStudentId() { const id = 'S' + String(nextStudentId).padStart(4, '0');
-      nextStudentId++; return id; }
+    function generateVoucher() { 
+      return 'FV' + String(transactions.length + 1).padStart(6, '0'); 
+    }
 
-    function generateVoucher() { return 'FV' + String(transactions.length + 1).padStart(6, '0'); }
+    function getStudent(id) { 
+      return students.find(s => s.id === id); 
+    }
 
-    function getStudent(id) { return students.find(s => s.id === id); }
+    function getMonthlyData(sid, mk) { 
+      return monthlyData[sid] && monthlyData[sid][mk] ? monthlyData[sid][mk] : null; 
+    }
 
-    function getMonthlyData(sid, mk) { return monthlyData[sid] && monthlyData[sid][mk] ? monthlyData[sid][mk] : null; }
+    function getAllStudentMonths(sid) { 
+      return monthlyData[sid] ? Object.keys(monthlyData[sid]).sort() : []; 
+    }
 
-    function getAllStudentMonths(sid) { return monthlyData[sid] ? Object.keys(monthlyData[sid]).sort() : []; }
-
-    function getNextMonth(month) { const idx = MONTHS.indexOf(month); return idx === MONTHS.length - 1 ? MONTHS[0] : MONTHS[idx +
-        1]; }
+    function getNextMonth(month) { 
+      const idx = MONTHS.indexOf(month); 
+      return idx === MONTHS.length - 1 ? MONTHS[0] : MONTHS[idx + 1]; 
+    }
 
     function getNextClass(currentClass) {
       const idx = CLASSES.indexOf(currentClass);
@@ -1688,90 +1654,164 @@
       return CLASSES[idx + 1];
     }
 
-    function openModal(id) { document.getElementById(id).classList.add('show'); }
-
-    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-    document.querySelectorAll('.modal').forEach(m => {
-      m.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
-    });
-
-    function getMonthKey(month, year) { return month + ' ' + year; }
-
-    // ====================================================================
-    // EDIT MODE
-    // ====================================================================
-    function toggleEditMode() {
-      editMode = !editMode;
-      const indicator = document.getElementById('editModeIndicator');
-      const saveBtn = document.getElementById('saveAllBtn');
-
-      if (editMode) {
-        indicator.classList.add('active');
-        saveBtn.style.display = 'inline-flex';
-        showToast('✏️ Edit mode enabled. Click on any field to edit. Click "Save All" to save.');
-      } else {
-        indicator.classList.remove('active');
-        saveBtn.style.display = 'none';
-        showToast('Edit mode disabled');
-      }
-      loadStudents();
+    function openModal(id) { 
+      document.getElementById(id).classList.add('show'); 
     }
 
-    function saveAllEdits() {
-      const rows = document.querySelectorAll('#studentsBody tr');
-      let changes = 0;
-      let error = false;
+    function closeModal(id) { 
+      document.getElementById(id).classList.remove('show'); 
+    }
 
-      rows.forEach(row => {
-        const id = row.dataset.id;
-        if (!id) return;
-        const student = getStudent(id);
-        if (!student) return;
+    function getMonthKey(month, year) { 
+      return month + ' ' + year; 
+    }
 
-        // Check for admission no
-        const admissionNoField = row.querySelector('.editable-field[data-field="admission_no"]');
-        if (admissionNoField) {
-          const newAdmissionNo = admissionNoField.textContent.trim();
-          if (newAdmissionNo && newAdmissionNo !== '-' && newAdmissionNo !== student.admission_no) {
-            // Check duplicate
-            if (students.some(s => s.admission_no === newAdmissionNo && s.id !== id)) {
-              showToast(`⚠️ Admission number "${newAdmissionNo}" already exists!`, true);
-              error = true;
-              return;
-            }
-            student.admission_no = newAdmissionNo;
-            changes++;
-          }
+    // ====================================================================
+    // SAVE & LOAD DATA
+    // ====================================================================
+    function saveData() {
+      try {
+        const data = {
+          students: students,
+          transactions: transactions,
+          monthly_data: monthlyData,
+          next_student_id: nextStudentId,
+          promotion_history: promotionHistory,
+          last_save: new Date().toISOString()
+        };
+        localStorage.setItem('schoolData', JSON.stringify(data));
+        return true;
+      } catch (e) {
+        showToast('❌ Error saving data: ' + e.message, true);
+        return false;
+      }
+    }
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem('schoolData');
+        if (raw) {
+          const data = JSON.parse(raw);
+          students = data.students || [];
+          transactions = data.transactions || [];
+          monthlyData = data.monthly_data || {};
+          nextStudentId = data.next_student_id || 1;
+          promotionHistory = data.promotion_history || [];
+          showToast('📂 Data loaded successfully');
+        } else {
+          showToast('📂 No existing data found. Starting fresh.');
         }
+      } catch (e) {
+        showToast('❌ Error loading data: ' + e.message, true);
+        students = [];
+        transactions = [];
+        monthlyData = {};
+        nextStudentId = 1;
+        promotionHistory = [];
+      }
+      updateDashboard();
+      loadStudents();
+      populateHistoryStudents();
+      updateBackupStats();
+      loadPromoteHistory();
+    }
 
-        // Check other fields
-        const fields = row.querySelectorAll('.editable-field:not([data-field="admission_no"])');
-        fields.forEach(el => {
-          const field = el.dataset.field;
-          const newValue = el.textContent.trim();
-          const currentValue = student[field] || '';
-          if (newValue !== currentValue && newValue !== '-') {
-            student[field] = newValue;
-            changes++;
-          }
+    // ====================================================================
+    // DASHBOARD
+    // ====================================================================
+    function updateDashboardToLatest() {
+      let latestMonth = currentMonth,
+        latestYear = currentYear;
+      let latestDate = new Date(parseInt(currentYear), MONTHS.indexOf(currentMonth));
+      for (const sid in monthlyData) {
+        for (const mk in monthlyData[sid]) {
+          const [m, y] = mk.split(' ');
+          const d = new Date(parseInt(y), MONTHS.indexOf(m));
+          if (d > latestDate) { latestDate = d;
+            latestMonth = m;
+            latestYear = y; }
+        }
+      }
+      document.getElementById('dashMonth').value = latestMonth;
+      document.getElementById('dashYear').value = latestYear;
+      updateDashboard();
+    }
+
+    function updateDashboard() {
+      const month = document.getElementById('dashMonth').value;
+      const year = document.getElementById('dashYear').value;
+      const mk = getMonthKey(month, year);
+      const totalStudents = students.length;
+      let totalPaid = 0,
+        totalBalance = 0,
+        totalPreviousFee = 0,
+        activeStudents = 0;
+      
+      students.forEach(s => {
+        if (monthlyData[s.id] && monthlyData[s.id][mk]) {
+          const d = monthlyData[s.id][mk];
+          totalPaid += d.paid || 0;
+          totalBalance += d.balance || 0;
+          totalPreviousFee += d.previous_fee || 0;
+          activeStudents++;
+        }
+      });
+      
+      document.getElementById('dashStudents').textContent = activeStudents;
+      document.getElementById('dashCollected').textContent = formatCurrency(totalPaid);
+      document.getElementById('dashBalance').textContent = formatCurrency(totalBalance);
+      document.getElementById('dashPreviousFee').textContent = formatCurrency(totalPreviousFee);
+      document.getElementById('topStudents').textContent = totalStudents;
+      document.getElementById('topCollected').textContent = formatCurrency(totalPaid);
+      document.getElementById('topBalance').textContent = formatCurrency(totalBalance);
+      document.getElementById('dashPeriodLabel').textContent = `(${month} ${year})`;
+      
+      // Update class report
+      const tbody = document.getElementById('classBody');
+      tbody.innerHTML = '';
+      const sections = ['A', 'B', 'C', 'D'];
+      CLASSES.forEach(cls => {
+        sections.forEach(sec => {
+          const list = students.filter(s => s.class === cls && s.section === sec);
+          if (!list.length) return;
+          let paid = 0,
+            bal = 0;
+          list.forEach(s => { 
+            if (monthlyData[s.id] && monthlyData[s.id][mk]) { 
+              const d = monthlyData[s.id][mk];
+              paid += d.paid || 0;
+              bal += d.balance || 0; 
+            } 
+          });
+          const totalFee = paid + bal;
+          const depositPercent = totalFee > 0 ? Math.round((paid / totalFee) * 100) : 0;
+          let statusText = depositPercent >= 100 ? 'Paid' : depositPercent >= 50 ? 'Partial' : 'Pending';
+          let statusClass = depositPercent >= 100 ? 'badge-paid' : depositPercent >= 50 ? 'badge-partial' :
+            'badge-pending';
+          const tr = document.createElement('tr');
+          tr.innerHTML =
+            `<td><strong>${cls}</strong></td><td>${sec}</td><td>${list.length}</td><td style="color:var(--success);font-weight:700;">${formatCurrency(paid)}</td><td style="color:${bal>0?'var(--danger)':'var(--success)'};font-weight:700;">${formatCurrency(bal)}</td><td><strong>${depositPercent}%</strong></td><td><span class="badge-status ${statusClass}">${statusText}</span></td>`;
+          tbody.appendChild(tr);
         });
       });
-
-      if (error) {
-        showToast('⚠️ Some changes had errors. Please fix and try again.', true);
-        return;
-      }
-
-      if (changes > 0) {
-        saveData();
-        showToast(`✅ ${changes} changes saved successfully!`);
-        editMode = false;
-        document.getElementById('editModeIndicator').classList.remove('active');
-        document.getElementById('saveAllBtn').style.display = 'none';
-        loadStudents();
+      
+      // Recent transactions
+      const rBody = document.getElementById('recentBody');
+      rBody.innerHTML = '';
+      let recent = [...transactions].filter(t => t.month === month && t.year === year).slice(-10).reverse();
+      if (!recent.length) {
+        rBody.innerHTML = `<tr><td colspan="7" style="padding:30px;color:var(--text-muted);">No transactions for ${month} ${year}</td></tr>`;
       } else {
-        showToast('No changes to save');
+        recent.forEach(t => {
+          const isCredit = t.fee_type === 'Previous Fee Added' || t.fee_type === 'Previous Fee Carried Forward';
+          const tr = document.createElement('tr');
+          tr.innerHTML =
+            `<td>${t.date||''}</td><td><strong>${t.voucher||''}</strong></td><td>${(t.student_name||'').slice(0,15)}</td><td style="color:${isCredit ? 'var(--danger)' : 'var(--success)'};font-weight:700;">${isCredit ? '+' : '-'} ${formatCurrency(t.amount||0)}</td><td>${t.fee_type||''}</td><td>${t.month||''}</td><td>${formatCurrency(t.balance||0)}</td>`;
+          rBody.appendChild(tr);
+        });
       }
+      updateBackupStats();
+      showToast('🔄 Dashboard updated');
     }
 
     // ====================================================================
@@ -1884,11 +1924,17 @@
       const admissionNo = document.getElementById('modalAdmissionNo').value.trim();
       const name = document.getElementById('modalName').value.trim();
       const father = document.getElementById('modalFather').value.trim();
-      if (!name || !father) { showToast('⚠️ Name and Father required!', true); return; }
+      
+      if (!name || !father) {
+        showToast('⚠️ Name and Father required!', true);
+        return;
+      }
+      
       if (admissionNo && students.some(s => s.admission_no === admissionNo)) {
         showToast('⚠️ Admission number already exists!', true);
         return;
       }
+      
       const cls = document.getElementById('modalClass').value;
       const section = document.getElementById('modalSection').value;
       const monthly = parseFloat(document.getElementById('modalMonthly').value) || 0;
@@ -1900,24 +1946,29 @@
       const month = document.getElementById('modalMonth').value;
       const year = document.getElementById('modalYear').value;
       const id = generateStudentId();
+      
       students.push({ id, admission_no: admissionNo || id, name, father, class: cls, section, phone, address,
         created_at: getTodayDate() });
+      
       const mk = getMonthKey(month, year);
       if (!monthlyData[id]) monthlyData[id] = {};
       const totalFee = monthly + exam + other + previousFee;
       monthlyData[id][mk] = { monthly_fee: monthly, exam_fee: exam, other_fee: other, previous_fee: previousFee, paid: 0,
         balance: totalFee, date: getTodayDate() };
+      
       if (previousFee > 0) {
         transactions.push({ voucher: generateVoucher(), student_id: id, student_name: name, class: cls, section, month, year,
           fee_type: 'Previous Fee Added', amount: previousFee, balance: totalFee, date: getTodayDate(), method: 'Manual',
           received_by: 'Admin', notes: 'Initial previous fee' });
       }
-      saveData();
-      closeModal('addStudentModal');
-      loadStudents();
-      updateDashboard();
-      populateHistoryStudents();
-      showToast(`✅ Student added! ID: ${id}`);
+      
+      if (saveData()) {
+        closeModal('addStudentModal');
+        loadStudents();
+        updateDashboard();
+        populateHistoryStudents();
+        showToast(`✅ Student added! ID: ${id}`);
+      }
     }
 
     function editStudentModal(id) {
@@ -1948,24 +1999,28 @@
       s.class = document.getElementById('editClass').value;
       s.section = document.getElementById('editSection').value;
       s.phone = document.getElementById('editPhone').value;
-      saveData();
-      closeModal('editStudentModal');
-      loadStudents();
-      updateDashboard();
-      populateHistoryStudents();
-      showToast('✅ Student updated!');
+      if (saveData()) {
+        closeModal('editStudentModal');
+        loadStudents();
+        updateDashboard();
+        populateHistoryStudents();
+        showToast('✅ Student updated!');
+      }
     }
 
     function deleteStudentById(id) {
       if (!confirm('⚠️ Delete student and all records?')) return;
+      
       students = students.filter(s => s.id !== id);
       transactions = transactions.filter(t => t.student_id !== id);
       delete monthlyData[id];
-      saveData();
-      loadStudents();
-      updateDashboard();
-      populateHistoryStudents();
-      showToast('🗑️ Student deleted');
+      
+      if (saveData()) {
+        loadStudents();
+        updateDashboard();
+        populateHistoryStudents();
+        showToast('🗑️ Student deleted');
+      }
     }
 
     function checkSpelling(studentId) {
@@ -1977,24 +2032,107 @@
         father = student.father;
       const nameParts = name.split(' ');
       for (let i = 0; i < nameParts.length; i++) {
-        if (SPELLING_DICT[nameParts[i]]) { corrections.push(`"${nameParts[i]}" → "${SPELLING_DICT[nameParts[i]]}"`);
+        if (SPELLING_DICT[nameParts[i]]) { 
+          corrections.push(`"${nameParts[i]}" → "${SPELLING_DICT[nameParts[i]]}"`);
           nameParts[i] = SPELLING_DICT[nameParts[i]];
-          updated = true; }
+          updated = true; 
+        }
       }
       if (updated) student.name = nameParts.join(' ');
       const fatherParts = father.split(' ');
       for (let i = 0; i < fatherParts.length; i++) {
-        if (SPELLING_DICT[fatherParts[i]]) { corrections.push(`"${fatherParts[i]}" → "${SPELLING_DICT[fatherParts[i]]}"`);
+        if (SPELLING_DICT[fatherParts[i]]) { 
+          corrections.push(`"${fatherParts[i]}" → "${SPELLING_DICT[fatherParts[i]]}"`);
           fatherParts[i] = SPELLING_DICT[fatherParts[i]];
-          updated = true; }
+          updated = true; 
+        }
       }
       if (updated) student.father = fatherParts.join(' ');
       if (updated) {
-        if (confirm(`✏️ Spelling corrections found:\n\n${corrections.join('\n')}\n\nApply?`)) { saveData();
+        if (confirm(`✏️ Spelling corrections found:\n\n${corrections.join('\n')}\n\nApply?`)) { 
+          saveData();
           loadStudents();
-          showToast('✅ Spelling corrected!'); } else { const orig = getStudent(studentId); if (orig) { orig.name = name;
-            orig.father = father; } }
+          showToast('✅ Spelling corrected!'); 
+        } else { 
+          const orig = getStudent(studentId); 
+          if (orig) { orig.name = name;
+            orig.father = father; } 
+        }
       } else showToast('✅ No spelling mistakes found.');
+    }
+
+    function toggleEditMode() {
+      editMode = !editMode;
+      const indicator = document.getElementById('editModeIndicator');
+      const saveBtn = document.getElementById('saveAllBtn');
+
+      if (editMode) {
+        indicator.classList.add('active');
+        saveBtn.style.display = 'inline-flex';
+        showToast('✏️ Edit mode enabled. Click on any field to edit. Click "Save All" to save.');
+      } else {
+        indicator.classList.remove('active');
+        saveBtn.style.display = 'none';
+        showToast('Edit mode disabled');
+      }
+      loadStudents();
+    }
+
+    function saveAllEdits() {
+      const rows = document.querySelectorAll('#studentsBody tr');
+      let changes = 0;
+      let error = false;
+
+      rows.forEach(row => {
+        const id = row.dataset.id;
+        if (!id) return;
+        const student = getStudent(id);
+        if (!student) return;
+
+        // Check for admission no
+        const admissionNoField = row.querySelector('.editable-field[data-field="admission_no"]');
+        if (admissionNoField) {
+          const newAdmissionNo = admissionNoField.textContent.trim();
+          if (newAdmissionNo && newAdmissionNo !== '-' && newAdmissionNo !== student.admission_no) {
+            // Check duplicate
+            if (students.some(s => s.admission_no === newAdmissionNo && s.id !== id)) {
+              showToast(`⚠️ Admission number "${newAdmissionNo}" already exists!`, true);
+              error = true;
+              return;
+            }
+            student.admission_no = newAdmissionNo;
+            changes++;
+          }
+        }
+
+        // Check other fields
+        const fields = row.querySelectorAll('.editable-field:not([data-field="admission_no"])');
+        fields.forEach(el => {
+          const field = el.dataset.field;
+          const newValue = el.textContent.trim();
+          const currentValue = student[field] || '';
+          if (newValue !== currentValue && newValue !== '-') {
+            student[field] = newValue;
+            changes++;
+          }
+        });
+      });
+
+      if (error) {
+        showToast('⚠️ Some changes had errors. Please fix and try again.', true);
+        return;
+      }
+
+      if (changes > 0) {
+        saveData();
+        showToast(`✅ ${changes} changes saved successfully!`);
+        editMode = false;
+        document.getElementById('editModeIndicator').classList.remove('active');
+        document.getElementById('saveAllBtn').style.display = 'none';
+        loadStudents();
+      } else {
+        showToast('No changes to save');
+      }
     }
 
     // ====================================================================
@@ -2031,15 +2169,18 @@
       const fromClass = document.getElementById('promoteFromClass').value;
       const section = document.getElementById('promoteSection').value;
       const nextClass = getNextClass(fromClass);
+      
       if (!nextClass) {
         showToast('⚠️ Cannot promote from this class!', true);
         return;
       }
+      
       const toPromote = students.filter(s => s.class === fromClass && s.section === section);
       if (!toPromote.length) {
         showToast('⚠️ No students to promote!', true);
         return;
       }
+      
       if (!confirm(`🚀 Promote ${toPromote.length} students from ${fromClass} (${section}) to ${nextClass}?`)) return;
 
       toPromote.forEach(s => {
@@ -2063,10 +2204,11 @@
         students: toPromote.map(s => s.id)
       });
 
-      saveData();
-      document.getElementById('promotePreview').style.display = 'none';
-      showToast(`✅ ${toPromote.length} students promoted from ${fromClass} to ${nextClass}!`);
-      loadPromoteHistory();
+      if (saveData()) {
+        document.getElementById('promotePreview').style.display = 'none';
+        showToast(`✅ ${toPromote.length} students promoted from ${fromClass} to ${nextClass}!`);
+        loadPromoteHistory();
+      }
     }
 
     function loadPromoteHistory() {
@@ -2108,7 +2250,10 @@
 
     function generateSelectedVouchers() {
       const selected = getSelectedStudents();
-      if (!selected.length) { showToast('⚠️ Select at least one student.', true); return; }
+      if (!selected.length) { 
+        showToast('⚠️ Select at least one student.', true); 
+        return; 
+      }
       const month = document.getElementById('vMonth').value,
         year = document.getElementById('vYear').value;
       let html =
@@ -2171,6 +2316,7 @@
       win.document.write(html);
       win.document.close();
       setTimeout(() => win.print(), 500);
+      showToast(`✅ ${selected.length} vouchers generated!`);
     }
 
     // ====================================================================
@@ -2182,8 +2328,11 @@
       const list = document.getElementById('vListbox');
       list.innerHTML = '';
       const filtered = students.filter(s => s.class === cls && s.section === sec);
-      if (!filtered.length) { list.innerHTML =
-        '<div style="color:var(--text-muted);text-align:center;padding:40px 0;">No students found</div>'; return; }
+      if (!filtered.length) { 
+        list.innerHTML =
+        '<div style="color:var(--text-muted);text-align:center;padding:40px 0;">No students found</div>'; 
+        return; 
+      }
       filtered.forEach(s => {
         const div = document.createElement('div');
         div.className = 'student-item';
@@ -2205,9 +2354,13 @@
       });
       updateSelectedCount();
       document.getElementById('selectAllCheckbox').checked = false;
+      showToast(`📋 Loaded ${filtered.length} students from ${cls} (${sec})`);
     }
 
-    function updateVoucherMonth() { if (currentVoucherStudent) generateVoucherPreview(currentVoucherStudent); }
+    function updateVoucherMonth() { 
+      if (currentVoucherStudent) generateVoucherPreview(currentVoucherStudent);
+      showToast('🔄 Voucher updated');
+    }
 
     function generateVoucherPreview(s) {
       const container = document.getElementById('voucherDisplay');
@@ -2260,7 +2413,10 @@
     }
 
     function printVoucher() {
-      if (!currentVoucherStudent) { showToast('⚠️ Select a student first!', true); return; }
+      if (!currentVoucherStudent) { 
+        showToast('⚠️ Select a student first!', true); 
+        return; 
+      }
       const html = document.getElementById('voucherDisplay').innerHTML;
       const win = window.open('', '_blank');
       win.document.write(`<html><head><title>Fee Voucher</title><style>
@@ -2280,13 +2436,20 @@
       </style></head><body>${html}</body></html>`);
       win.document.close();
       setTimeout(() => win.print(), 500);
+      showToast('🖨️ Printing voucher...');
     }
 
     function sendWhatsApp() {
-      if (!currentVoucherStudent) { showToast('⚠️ Select a student first!', true); return; }
+      if (!currentVoucherStudent) { 
+        showToast('⚠️ Select a student first!', true); 
+        return; 
+      }
       const s = currentVoucherStudent;
       const phone = s.phone || '';
-      if (!phone) { showToast('⚠️ No phone number found!', true); return; }
+      if (!phone) { 
+        showToast('⚠️ No phone number found!', true); 
+        return; 
+      }
       const month = document.getElementById('vMonth').value;
       const year = document.getElementById('vYear').value;
       const mk = getMonthKey(month, year);
@@ -2317,16 +2480,25 @@
       if (p.startsWith('0')) p = '92' + p.slice(1);
       else if (!p.startsWith('92')) p = '92' + p;
       window.open('https://wa.me/' + p + '?text=' + encodeURIComponent(msg), '_blank');
+      showToast('💬 Opening WhatsApp...');
     }
 
-    function addNextMonthFee(student) { if (student) openAddMonthModal(student.id);
-      else showToast('⚠️ Select a student first!', true); }
+    function addNextMonthFee(student) { 
+      if (student) {
+        openAddMonthModal(student.id);
+      } else {
+        showToast('⚠️ Select a student first!', true); 
+      }
+    }
 
     // ====================================================================
     // DEPOSIT
     // ====================================================================
     function openFeeDepositModal(student) {
-      if (!student) { showToast('⚠️ Select a student first!', true); return; }
+      if (!student) { 
+        showToast('⚠️ Select a student first!', true); 
+        return; 
+      }
       currentVoucherStudent = student;
       const s = student;
       document.getElementById('feeDepositInfo').innerHTML =
@@ -2389,9 +2561,15 @@
     }
 
     function depositFee() {
-      if (!currentVoucherStudent) { showToast('⚠️ No student selected!', true); return; }
+      if (!currentVoucherStudent) { 
+        showToast('⚠️ No student selected!', true); 
+        return; 
+      }
       const amount = parseFloat(document.getElementById('fdAmount').value) || 0;
-      if (amount <= 0) { showToast('⚠️ Enter valid amount!', true); return; }
+      if (amount <= 0) { 
+        showToast('⚠️ Enter valid amount!', true); 
+        return; 
+      }
       const s = currentVoucherStudent;
       const month = document.getElementById('fdMonth').value;
       const year = document.getElementById('fdYear').value;
@@ -2414,13 +2592,14 @@
         month, year, fee_type: 'Deposited Fee', amount: actualAmount, balance: newBalance, date: depositDate, method,
         received_by: received, notes: actualAmount < amount ? 'Overpayment adjusted' : '' });
       updateFuturePreviousFees(s.id, month, year, newBalance);
-      saveData();
-      updateFeeDepositSummary();
-      loadFeeTransactionHistory();
-      loadStudents();
-      updateDashboard();
-      populateHistoryStudents();
-      showToast(`✅ Deposit recorded! Voucher: ${voucher}`);
+      if (saveData()) {
+        updateFeeDepositSummary();
+        loadFeeTransactionHistory();
+        loadStudents();
+        updateDashboard();
+        populateHistoryStudents();
+        showToast(`✅ Deposit recorded! Voucher: ${voucher}`);
+      }
     }
 
     function updateFuturePreviousFees(studentId, currentMonth, currentYear, newBalance) {
@@ -2537,12 +2716,13 @@
           balance: totalFee, date: getTodayDate(), method: 'Auto', received_by: 'System',
           notes: `Previous balance of ${formatCurrency(previousFee)} carried forward` });
       }
-      saveData();
-      closeModal('addMonthModal');
-      loadStudents();
-      updateDashboard();
-      populateHistoryStudents();
-      showToast(`✅ Fee added for ${mk}`);
+      if (saveData()) {
+        closeModal('addMonthModal');
+        loadStudents();
+        updateDashboard();
+        populateHistoryStudents();
+        showToast(`✅ Fee added for ${mk}`);
+      }
     }
 
     function getPreviousMonthBalance(studentId, targetMonth, targetYear) {
@@ -2566,8 +2746,7 @@
         const targetIdx = MONTHS.indexOf(targetMonth);
         let isNextMonth = false;
         if (parseInt(targetYear) === parseInt(lastYear) && targetIdx === lastIdx + 1) isNextMonth = true;
-        else if (parseInt(targetYear) === parseInt(lastYear) + 1 && targetIdx === 0 && lastIdx === 11) isNextMonth =
-        true;
+        else if (parseInt(targetYear) === parseInt(lastYear) + 1 && targetIdx === 0 && lastIdx === 11) isNextMonth = true;
         if (isNextMonth) prevKey = lastKey;
       }
       if (prevKey) { const prevData = getMonthlyData(studentId, prevKey); if (prevData) return prevData.balance || 0; }
@@ -2596,7 +2775,10 @@
       filtered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       document.getElementById('historyCount').textContent = filtered.length;
       if (!filtered.length) { tbody.innerHTML =
-        `<tr><td colspan="9" style="padding:30px;color:var(--text-muted);">No transactions found</td></tr>`; return; }
+        `<tr><td colspan="9" style="padding:30px;color:var(--text-muted);">No transactions found</td></tr>`; 
+        showToast('📜 No transactions found');
+        return; 
+      }
       filtered.forEach(t => {
         const isCredit = t.fee_type === 'Previous Fee Added' || t.fee_type === 'Previous Fee Carried Forward';
         const tr = document.createElement('tr');
@@ -2604,10 +2786,14 @@
           `<td><strong>${t.voucher||''}</strong></td><td>${t.date||''}</td><td>${(t.student_name||'').slice(0,15)}</td><td>${t.class||''}</td><td>${t.section||'A'}</td><td>${t.month||''}</td><td>${t.fee_type||''}</td><td style="color:${isCredit ? 'var(--danger)' : 'var(--success)'};font-weight:700;">${isCredit ? '+' : '-'} ${formatCurrency(t.amount||0)}</td><td>${formatCurrency(t.balance||0)}</td>`;
         tbody.appendChild(tr);
       });
+      showToast(`📜 Loaded ${filtered.length} transactions`);
     }
 
     function exportHistoryCSV() {
-      if (!transactions.length) { showToast('⚠️ No data to export!', true); return; }
+      if (!transactions.length) { 
+        showToast('⚠️ No data to export!', true); 
+        return; 
+      }
       let csv = 'Voucher,Date,Student,Class,Section,Month,Year,Fee Type,Amount,Balance,Method\n';
       transactions.forEach(t => { csv +=
           `${t.voucher||''},${t.date||''},${t.student_name||''},${t.class||''},${t.section||'A'},${t.month||''},${t.year||''},${t.fee_type||''},${t.amount||0},${t.balance||0},${t.method||''}\n`; });
@@ -2645,6 +2831,7 @@
         '\n\n════════════════════════════════════════════════════════════\n🎓 Success with Wisdom!\n════════════════════════════════════════════════════════════';
       out.textContent = text;
       currentReportData = text;
+      showToast('📊 Report generated');
     }
 
     function generateFullReport() {
@@ -2763,7 +2950,10 @@
 
     function exportPDFReport() {
       const content = document.getElementById('reportOutput').textContent;
-      if (!content || content.includes('Select report type')) { showToast('⚠️ Generate report first!', true); return; }
+      if (!content || content.includes('Select report type')) { 
+        showToast('⚠️ Generate report first!', true); 
+        return; 
+      }
       const type = document.getElementById('reportType').value;
       let title = 'Fee Report';
       if (type === 'monthly') title = 'Monthly Report';
@@ -2777,12 +2967,18 @@
       document.body.appendChild(element);
       html2pdf().set({ margin: 10, filename: `${title.replace(/\s/g,'_')}.pdf`, image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).save()
-        .then(() => document.body.removeChild(element));
+        .then(() => {
+          document.body.removeChild(element);
+          showToast('📄 PDF exported!');
+        });
     }
 
     function exportReportText() {
       const content = document.getElementById('reportOutput').textContent;
-      if (!content || content.includes('Select report type')) { showToast('⚠️ Generate report first!', true); return; }
+      if (!content || content.includes('Select report type')) { 
+        showToast('⚠️ Generate report first!', true); 
+        return; 
+      }
       const blob = new Blob([content], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -2796,8 +2992,10 @@
     // ====================================================================
     // BACKUP
     // ====================================================================
-    function updateBackupStats() { document.getElementById('backupStats').innerHTML =
-        `👨‍🎓 Students: ${students.length} | 📜 Transactions: ${transactions.length}`; }
+    function updateBackupStats() { 
+      document.getElementById('backupStats').innerHTML =
+        `👨‍🎓 Students: ${students.length} | 📜 Transactions: ${transactions.length}`; 
+    }
 
     function downloadBackup() {
       const data = { export_date: new Date().toISOString(), version: '5.0', students, transactions,
@@ -2829,9 +3027,13 @@
             monthlyData = data.monthly_data || {};
             nextStudentId = data.next_student_id || 1;
             promotionHistory = data.promotion_history || [];
-            saveData();
-            showToast('✅ Data restored!');
-          } catch (err) { showToast('❌ Error: ' + err.message, true); }
+            if (saveData()) {
+              showToast('✅ Data restored!');
+              loadData();
+            }
+          } catch (err) { 
+            showToast('❌ Error: ' + err.message, true); 
+          }
         };
         reader.readAsText(file);
       };
@@ -2839,94 +3041,95 @@
     }
 
     // ====================================================================
-    // DASHBOARD
+    // MODAL CLOSE ON BACKDROP
     // ====================================================================
-    function updateDashboardToLatest() {
-      let latestMonth = currentMonth,
-        latestYear = currentYear;
-      let latestDate = new Date(parseInt(currentYear), MONTHS.indexOf(currentMonth));
-      for (const sid in monthlyData) {
-        for (const mk in monthlyData[sid]) {
-          const [m, y] = mk.split(' ');
-          const d = new Date(parseInt(y), MONTHS.indexOf(m));
-          if (d > latestDate) { latestDate = d;
-            latestMonth = m;
-            latestYear = y; }
-        }
-      }
-      document.getElementById('dashMonth').value = latestMonth;
-      document.getElementById('dashYear').value = latestYear;
-      updateDashboard();
-    }
-
-    function updateDashboard() {
-      const month = document.getElementById('dashMonth').value;
-      const year = document.getElementById('dashYear').value;
-      const mk = getMonthKey(month, year);
-      const totalStudents = students.length;
-      let totalPaid = 0,
-        totalBalance = 0,
-        totalPreviousFee = 0,
-        activeStudents = 0;
-      students.forEach(s => {
-        if (monthlyData[s.id] && monthlyData[s.id][mk]) {
-          const d = monthlyData[s.id][mk];
-          totalPaid += d.paid || 0;
-          totalBalance += d.balance || 0;
-          totalPreviousFee += d.previous_fee || 0;
-          activeStudents++;
-        }
+    document.querySelectorAll('.modal').forEach(m => {
+      m.addEventListener('click', function(e) { 
+        if (e.target === this) this.classList.remove('show'); 
       });
-      document.getElementById('dashStudents').textContent = activeStudents;
-      document.getElementById('dashCollected').textContent = formatCurrency(totalPaid);
-      document.getElementById('dashBalance').textContent = formatCurrency(totalBalance);
-      document.getElementById('dashPreviousFee').textContent = formatCurrency(totalPreviousFee);
-      document.getElementById('topStudents').textContent = totalStudents;
-      document.getElementById('topCollected').textContent = formatCurrency(totalPaid);
-      document.getElementById('topBalance').textContent = formatCurrency(totalBalance);
-      document.getElementById('dashPeriodLabel').textContent = `(${month} ${year})`;
-      const tbody = document.getElementById('classBody');
-      tbody.innerHTML = '';
-      const sections = ['A', 'B', 'C', 'D'];
-      CLASSES.forEach(cls => {
-        sections.forEach(sec => {
-          const list = students.filter(s => s.class === cls && s.section === sec);
-          if (!list.length) return;
-          let paid = 0,
-            bal = 0;
-          list.forEach(s => { if (monthlyData[s.id] && monthlyData[s.id][mk]) { const d = monthlyData[s.id][mk];
-            paid += d.paid || 0;
-            bal += d.balance || 0; } });
-          const totalFee = paid + bal;
-          const depositPercent = totalFee > 0 ? Math.round((paid / totalFee) * 100) : 0;
-          let statusText = depositPercent >= 100 ? 'Paid' : depositPercent >= 50 ? 'Partial' : 'Pending';
-          let statusClass = depositPercent >= 100 ? 'badge-paid' : depositPercent >= 50 ? 'badge-partial' :
-            'badge-pending';
-          const tr = document.createElement('tr');
-          tr.innerHTML =
-            `<td><strong>${cls}</strong></td><td>${sec}</td><td>${list.length}</td><td style="color:var(--success);font-weight:700;">${formatCurrency(paid)}</td><td style="color:${bal>0?'var(--danger)':'var(--success)'};font-weight:700;">${formatCurrency(bal)}</td><td><strong>${depositPercent}%</strong></td><td><span class="badge-status ${statusClass}">${statusText}</span></td>`;
-          tbody.appendChild(tr);
+    });
+
+    // ====================================================================
+    // INIT
+    // ====================================================================
+    function init() {
+      // Populate month/year selects
+      document.querySelectorAll('select[id$="Month"]:not(#hMonth):not(#rpMonth)').forEach(sel => {
+        sel.innerHTML = MONTHS.map(m => `<option value="${m}">${m}</option>`).join('');
+        sel.value = currentMonth;
+      });
+      document.querySelectorAll('select[id$="Year"]:not(#hYear):not(#rpYear)').forEach(sel => {
+        sel.innerHTML = YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
+        sel.value = currentYear;
+      });
+
+      // Dashboard month/year
+      const dashMonth = document.getElementById('dashMonth');
+      dashMonth.innerHTML = MONTHS.map(m => `<option value="${m}">${m}</option>`).join('');
+      dashMonth.value = currentMonth;
+      const dashYear = document.getElementById('dashYear');
+      dashYear.innerHTML = YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
+      dashYear.value = currentYear;
+
+      // History filters
+      const hMonth = document.getElementById('hMonth');
+      hMonth.innerHTML = '<option value="All">All</option>' + MONTHS.map(m => `<option value="${m}">${m}</option>`).join('');
+      hMonth.value = 'All';
+      const hYear = document.getElementById('hYear');
+      hYear.innerHTML = '<option value="All">All</option>' + YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
+      hYear.value = 'All';
+
+      // Report month/year
+      const rpMonth = document.getElementById('rpMonth');
+      rpMonth.innerHTML = '<option value="All Months">All Months</option>' + MONTHS.map(m => `<option value="${m}">${m}</option>`).join('');
+      rpMonth.value = currentMonth;
+      const rpYear = document.getElementById('rpYear');
+      rpYear.innerHTML = YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
+      rpYear.value = currentYear;
+
+      populateHistoryStudents();
+
+      // Sidebar navigation
+      document.querySelectorAll('.sidebar button').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+          if (this.dataset.tab === 'dashboard') updateDashboard();
+          if (this.dataset.tab === 'students') loadStudents();
+          if (this.dataset.tab === 'history') loadHistory();
+          if (this.dataset.tab === 'backup') updateBackupStats();
+          if (this.dataset.tab === 'reports') { toggleReportOptions();
+            generateReport(); }
+          if (this.dataset.tab === 'voucher') { loadVoucherStudents(); }
+          if (this.dataset.tab === 'promote') { loadPromoteHistory(); }
         });
       });
-      const rBody = document.getElementById('recentBody');
-      rBody.innerHTML = '';
-      let recent = [...transactions].filter(t => t.month === month && t.year === year).slice(-10).reverse();
-      if (!recent.length) { rBody.innerHTML =
-        `<tr><td colspan="7" style="padding:30px;color:var(--text-muted);">No transactions for ${month} ${year}</td></tr>`; } else { recent
-        .forEach(t => { const isCredit = t.fee_type === 'Previous Fee Added' || t.fee_type ===
-            'Previous Fee Carried Forward'; const tr = document.createElement('tr');
-          tr.innerHTML =
-            `<td>${t.date||''}</td><td><strong>${t.voucher||''}</strong></td><td>${(t.student_name||'').slice(0,15)}</td><td style="color:${isCredit ? 'var(--danger)' : 'var(--success)'};font-weight:700;">${isCredit ? '+' : '-'} ${formatCurrency(t.amount||0)}</td><td>${t.fee_type||''}</td><td>${t.month||''}</td><td>${formatCurrency(t.balance||0)}</td>`;
-          rBody.appendChild(tr); }); }
-      updateBackupStats();
+
+      document.getElementById('fdMonth').addEventListener('change', () => {
+        if (currentVoucherStudent) { updateFeeDepositSummary();
+          updateFeeAmount();
+          loadFeeTransactionHistory(); }
+      });
+      document.getElementById('fdYear').addEventListener('change', () => {
+        if (currentVoucherStudent) { updateFeeDepositSummary();
+          updateFeeAmount();
+          loadFeeTransactionHistory(); }
+      });
+      document.getElementById('reportType').addEventListener('change', toggleReportOptions);
+      document.getElementById('dashMonth').addEventListener('change', updateDashboard);
+      document.getElementById('dashYear').addEventListener('change', updateDashboard);
+
+      // Load data
+      loadData();
+      
+      showToast('🏫 System ready!');
     }
 
-    // ====================================================================
-    // START
-    // ====================================================================
+    // Start the application
     document.addEventListener('DOMContentLoaded', init);
-    console.log('🏫 LEADERS PUBLIC SCHOOL Premium v5.0 - with Admission No, Edit Mode & Promote Class!');
-    console.log('✨ Features: Edit Mode with Save All, Class Promotion with Save, Admission Number');
+    console.log('🏫 LEADERS PUBLIC SCHOOL Premium v5.0 - All Toast Messages Fixed!');
   </script>
 </body>
 </html>
